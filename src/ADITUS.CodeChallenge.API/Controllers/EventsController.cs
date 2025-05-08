@@ -1,3 +1,4 @@
+using ADITUS.CodeChallenge.API.Controllers;
 using ADITUS.CodeChallenge.API.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,10 +8,12 @@ namespace ADITUS.CodeChallenge.API
   public class EventsController : ControllerBase
   {
     private readonly IEventService _eventService;
+    private readonly IHardwareService _hardwareService;
 
-    public EventsController(IEventService eventService)
+    public EventsController(IEventService eventService, IHardwareService hardwareService)
     {
       _eventService = eventService;
+      _hardwareService = hardwareService;
     }
 
     /// <summary>
@@ -45,14 +48,27 @@ namespace ADITUS.CodeChallenge.API
       });
     }
 
-    [HttpGet]
-    [Route("{id}/reserve")]
-    public async Task<IActionResult> ReserveHardware(Guid id)
+    [HttpPost]
+    [Route("{id}/hardware")]
+    public async Task<IActionResult> ReserveHardware(Guid id, [FromBody]HardwareReservationRequest request)
     {
       var @event = await _eventService.GetEvent(id);
       if (@event == null)
       {
         return NotFound();
+      }
+      if (DateTime.Now.AddDays(7*4) > @event.StartDate)
+      {
+        throw new InvalidOperationException("Reservierungszeitraum unterschritten.");
+      }
+      if (@event.HardwareReservations.Any())
+      {
+        throw new InvalidOperationException("Reservierung schon getätigt.");
+      }
+      var availableHardware = _hardwareService.GetHardware(request.Type, request.Amount, @event.StartDate, @event.EndDate);
+      foreach (var hardware in availableHardware)
+      {
+        _hardwareService.ReserveHardware(hardware, @event);
       }
       return Ok();
     }

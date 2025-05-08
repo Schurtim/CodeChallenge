@@ -6,7 +6,8 @@ namespace ADITUS.CodeChallenge.API.Domain
     public int Year { get; init; }
     public string Name { get; init; }
     public EventType Type { get; init; }
-    public DateTime? StartDate { get; init; }
-    public DateTime? EndDate { get; init; }
+    public DateTime StartDate { get; init; }
+    public DateTime EndDate { get; init; }
+    public List<HardwareReservation> HardwareReservations { get; init; } = new List<HardwareReservation>();
   }
 }

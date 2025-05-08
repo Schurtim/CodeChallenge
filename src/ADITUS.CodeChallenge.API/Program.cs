@@ -9,6 +9,7 @@ builder.Services.AddControllers().AddJsonOptions(x =>
 });
 
 builder.Services.AddSingleton<IEventService, EventService>();
+builder.Services.AddSingleton<IHardwareService, HardwareService>();
 
 var app = builder.Build();
 
